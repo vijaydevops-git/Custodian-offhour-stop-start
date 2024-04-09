@@ -1,0 +1,37 @@
+policies:
+  - name: check-missing-tags
+    description: |
+      Checks for missing tags on newly created EC2 instances and notifies for missing tags after 10 minutes.
+    resource: ec2
+    mode:
+      type: cloudtrail
+      role: arn:aws:iam::891377088702:role/service-role/cloudcustodian-role-trxije47
+      events:
+        - RunInstances
+    filters:
+      - type: value
+        key: "tag:slack"
+        value_type: size
+        op: eq
+        value: 0
+      - or:
+          - type: value
+            key: tags.Name
+            value_type: size
+            op: eq
+            value: 0
+          - type: value
+            key: tags.Environment
+            value_type: size
+            op: eq
+            value: 0
+    actions:
+      - type: notify
+        slack_template: slack_default
+        slack_msg_color: danger
+        to:
+          - slack://webhook/#https://hooks.slack.com/services/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
+        transport:
+          type: sqs
+          queue: arn:aws:sqs:us-east-1:891377088702:custodian-mailer
+          role: arn:aws:iam::891377088702:role/service-role/cloudcustodian-role-trxije47
