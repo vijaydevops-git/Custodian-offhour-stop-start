@@ -1,0 +1,19 @@
+policies:
+  - name: notification-test2
+    resource: ec2
+    events:
+      - source: ec2.amazonaws.com
+        event: RunInstances
+    filters:
+      - "tag:mailertest": absent
+    actions:
+      - type: notify
+        slack_template: slack_default
+        priority_header: '2'
+        slack_msg_color: danger
+        subject: testing the mailer
+        to:
+          - vbr0709@gmail.com
+        transport:
+          type: sqs
+          queue: https://sqs.us-east-1.amazonaws.com/891377088702/custodian-mailer
